@@ -1,0 +1,32 @@
+[project]
+name = "csnt"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Ftps", email = "ftpsflandre@gmail.com" }
+]
+dependencies = [
+    "torch>=2.4.1",
+    "pytorch-ignite>=0.5.1",
+    "neuron>=8.2.6",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "black>=24.10.0",
+    "isort>=5.13.2",
+    "flake8>=7.1.1",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["csnt"]
