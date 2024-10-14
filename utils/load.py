@@ -22,7 +22,7 @@ def parse_sim_experiment_with_DVT(
 ):
 
     with open(sim_experiment_file, "rb") as f:
-        experiment_dict = pickle.load(f, encoding='latin1')
+        experiment_dict = pickle.load(f, encoding="latin1")
 
     num_simulations = len(experiment_dict["Results"]["listOfSingleSimulationDicts"])
     num_segments = len(experiment_dict["Params"]["allSegmentsType"])

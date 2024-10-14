@@ -11,6 +11,11 @@ training:
   num_epochs: &num_epochs 250
   DVT_loss_mult_factor: &DVT_loss_mult_factor 0.1
   v_threshold: -55
+  batch_size: 16
+  window_size_ms: 300
+  ignore_time_from_start: 500
+  y_train_soma_bias: -67.7
+  y_DTV_threshold: 3.0
 
 schedules:
   batch_size_per_epoch: [[8], *num_epochs]

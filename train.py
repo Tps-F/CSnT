@@ -17,6 +17,12 @@ from utils.pca import pca_torch
 
 config = Config()
 
+
+def process_function(engine, batch):
+    X_batch, (y_spike_batch, y_soma_batch, y_DVT_batch) = batch
+    return X_batch, y_spike_batch, y_soma_batch, y_DVT_batch
+
+
 files = glob(config.nmda_dataset.data_dir + "*_6_secDuration_*")
 
 valid_files = random.choice(files)
@@ -25,35 +31,30 @@ train_files = [f for f in files if f != valid_files]
 
 data_dict = {"train_files": train_files, "valid_files": valid_files}
 
-_, _, _, y_DVTs = parse_sim_experiment_with_DVT(train_files[:1][0])
-X_pca_DVT = torch.tensor(np.reshape(y_DVTs, [y_DVTs.shape[0], -1]), dtype=torch.float32)
 
-num_DVT_components = config.nmda_dataset.num_DVT_components
-
-eigenvectors, explained_variance_ratio = pca_torch(
-    X_pca_DVT, config.nmda_dataset.num_DVT_components
+valid_files_per_epoch = max(
+    1, int(config.training.validation_fraction * config.training.train_files_per_epoch)
 )
-total_explained_variance = 100 * explained_variance_ratio.sum().item()
-print(f"Total Explained Variance: {total_explained_variance:.2f}%")
-
-X_train, y_spike_train, y_soma_train, y_DVT_train = (
-    parse_multiple_sim_experiment_with_DVT(
-        train_files,
-        DVT_PCA_model=config.nmda_dataset.num_DVT_components,
-        fit_structure=False,
-    )
+dataset = SimulationDataset(
+    train_files,
+    valid_files_per_epoch,
+    config.training.batch_size,
+    config.training.window_size_ms,
+    config.training.train_file_load,
+    config.training.ignore_time_from_start,
+    config.training.y_train_soma_bias,
+    config.training.y_soma_threshold,
+    config.training.y_DTV_threshold,
 )
+dataloader = DataLoader(dataset, batch_size=config.training.batch_size, shuffle=False)
 
-y_DVT_train[y_DVT_train > config.nmda_dataset.num_DVT_components] = (
-    config.nmda_dataset.num_DVT_components
-)
-y_DVT_train[y_DVT_train < -config.nmda_dataset.num_DVT_components] = (
-    -config.nmda_dataset.num_DVT_components
-)
+trainer = Engine(process_function)
 
-y_soma_train[y_soma_train > config.training.v_threshold] = config.training.v_threshold
 
-sim_duration_ms = y_soma_train.shape[0]
-sim_duration_sec = float(sim_duration_ms) / 1000
+@trainer.on(Events.EPOCH_COMPLETED)
+def reset_epoch(engine):
+    dataset.shuffle()
 
-num_simulations_train = X_train.shape[-1]
+
+# トレーニング開始
+trainer.run(dataloader, max_epochs=5)
