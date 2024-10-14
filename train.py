@@ -17,7 +17,7 @@ from utils.pca import pca_torch
 
 config = Config()
 
-files = glob(config.nmda_dataset.data_dir + "*_6_secDuration_*")[:1]
+files = glob(config.nmda_dataset.data_dir + "*_6_secDuration_*")
 
 valid_files = random.choice(files)
 
@@ -25,7 +25,7 @@ train_files = [f for f in files if f != valid_files]
 
 data_dict = {"train_files": train_files, "valid_files": valid_files}
 
-_, _, _, y_DVTs = parse_sim_experiment_with_DVT(train_files[0])
+_, _, _, y_DVTs = parse_sim_experiment_with_DVT(train_files[:1][0])
 X_pca_DVT = torch.tensor(np.reshape(y_DVTs, [y_DVTs.shape[0], -1]), dtype=torch.float32)
 
 num_DVT_components = config.nmda_dataset.num_DVT_components
