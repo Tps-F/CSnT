@@ -1,0 +1,51 @@
+nmda_dataset:
+  train_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_train/"
+  valid_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_valid/"
+  test_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_test/"
+  models_dir: "/Reseach/Single_Neuron_InOut/models/NMDA/"
+  num_DVT_components: 20
+
+training:
+  validation_fraction: &validation_fraction 0.5
+  train_file_load: &train_file_load 0.2
+  valid_file_load: &valid_file_load 0.2
+  num_steps_multiplier: &num_steps_multiplier 10
+  train_files_per_epoch: 6
+  num_epochs: &num_epochs 250
+  DVT_loss_mult_factor: &DVT_loss_mult_factor 0.1
+  v_threshold: -55
+
+schedules:
+  batch_size_per_epoch: [[8], *num_epochs]
+  learning_rate_per_epoch:
+    - 0.0001
+    - 0.00003
+    - 0.00001
+    - 0.000003
+    - 0.000001
+
+  epochs_change:
+    - 0
+    - 40
+    - 80
+    - 120
+    - 160
+
+  loss_weights_per_epoch:
+    # usage: [epoch, loss_weight, DVT_loss_mult_factor * learning_rate]
+    - [1.0, 0.0200, *DVT_loss_mult_factor, 0.00005] # * num_epochs
+    - [2.0, 0.0100, *DVT_loss_mult_factor, 0.00003]
+    - [4.0, 0.0100, *DVT_loss_mult_factor, 0.00001]
+    - [8.0, 0.0100, *DVT_loss_mult_factor, 0.0000001]
+    - [9.0, 0.0030, *DVT_loss_mult_factor, 0.00000001]
+
+learning_schedule:
+  train_file_load: *train_file_load
+  valid_file_load: *valid_file_load
+  validation_fraction: *validation_fraction
+  num_epochs: *num_epochs
+  num_steps_multiplier: *num_steps_multiplier
+  batch_size_per_epoch:
+  loss_weights_per_epoch:
+  learning_rate_per_epoch:
+  num_train_steps_per_epoch:

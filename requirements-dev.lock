@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+antlr4-python3-runtime==4.9.3
+    # via omegaconf
 black==24.10.0
 click==8.1.7
     # via black
@@ -37,6 +39,8 @@ neuron==8.2.6
     # via csnt
 numpy==1.26.4
     # via neuron
+omegaconf==2.3.0
+    # via csnt
 packaging==24.1
     # via black
     # via neuron
@@ -51,6 +55,8 @@ pyflakes==3.2.0
     # via flake8
 pytorch-ignite==0.5.1
     # via csnt
+pyyaml==6.0.2
+    # via omegaconf
 setuptools==75.1.0
     # via neuron
 sympy==1.13.3

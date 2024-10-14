@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+antlr4-python3-runtime==4.9.3
+    # via omegaconf
 filelock==3.16.1
     # via torch
 find-libpython==0.4.0
@@ -28,11 +30,15 @@ neuron==8.2.6
     # via csnt
 numpy==1.26.4
     # via neuron
+omegaconf==2.3.0
+    # via csnt
 packaging==24.1
     # via neuron
     # via pytorch-ignite
 pytorch-ignite==0.5.1
     # via csnt
+pyyaml==6.0.2
+    # via omegaconf
 setuptools==75.1.0
     # via neuron
 sympy==1.13.3

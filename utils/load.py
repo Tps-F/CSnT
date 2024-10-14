@@ -18,6 +18,7 @@ def parse_sim_experiment_with_DVT(
     y_DTV_threshold=3.0,
     DVT_PCA_model=None,
     print_logs=False,
+    fit_structure=True
 ):
 
     with open(sim_experiment_file, "rb") as f:
@@ -43,7 +44,6 @@ def parse_sim_experiment_with_DVT(
             (num_segments, sim_duration_ms, num_simulations), dtype=np.float16
         )
 
-
     for k, sim_dict in enumerate(
         experiment_dict["Results"]["listOfSingleSimulationDicts"]
     ):
@@ -64,6 +64,9 @@ def parse_sim_experiment_with_DVT(
         else:
             y_DVTs[:, :, k] = curr_DVTs
 
+    if not fit_structure:
+        return X, y_spike, y_soma, y_DVTs
+
     # Match the structure
     X = np.transpose(X, axes=[2, 0, 1])
     y_spike = y_spike.T[:, :, np.newaxis]
@@ -78,3 +81,23 @@ def parse_sim_experiment_with_DVT(
     y_soma = y_soma - y_train_soma_bias
 
     return X, y_spike, y_soma, y_DVTs
+
+
+def parse_multiple_sim_experiment_with_DVT(
+    sim_experiment_files, DVT_PCA_model=None, v_threshold=-55, fit_structure=True
+):
+    X, y_spike, y_soma, y_DVT = [], [], [], []
+
+    for sim_experiment_file in sim_experiment_files:
+        X_curr, y_spike_curr, y_soma_curr, y_DVT_curr = parse_sim_experiment_with_DVT(
+            sim_experiment_file,
+            DVT_PCA_model=DVT_PCA_model,
+            y_DTV_threshold=v_threshold,
+            fit_structure=fit_structure,
+        )
+        X.append(X_curr)
+        y_spike.append(y_spike_curr)
+        y_soma.append(y_soma_curr)
+        y_DVT.append(y_DVT_curr)
+
+    return np.dstack(X), np.hstack(y_spike), np.hstack(y_soma), np.dstack(y_DVT)
