@@ -18,7 +18,7 @@ def parse_sim_experiment_with_DVT(
     y_DTV_threshold=3.0,
     DVT_PCA_model=None,
     print_logs=False,
-    fit_structure=True
+    fit_structure=True,
 ):
 
     with open(sim_experiment_file, "rb") as f:

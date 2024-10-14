@@ -1,42 +1,55 @@
+import random
 from glob import glob
 
+import numpy as np
+import torch
 from ignite.engine import Engine, Events
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
 from config import Config
 from modules.dataset import SimulationDataset
-from utils.load import parse_sim_experiment_with_DVT, parse_multiple_sim_experiment_with_DVT
-import torch
-import numpy as np
+from utils.load import (
+    parse_multiple_sim_experiment_with_DVT,
+    parse_sim_experiment_with_DVT,
+)
 from utils.pca import pca_torch
 
 config = Config()
 
-train_sec = glob(config.nmda_dataset.train_data_dir + "*_6_secDuration_*")[:1]
-train_files = glob(config.nmda_dataset.train_data_dir + '*_128_simulationRuns*_6_secDuration_*')
-valid_files = glob(config.nmda_dataset.valid_data_dir + '*_128_simulationRuns*_6_secDuration_*')
-test_files  = glob(config.nmda_dataset.test_data_dir  + '*_128_simulationRuns*_6_secDuration_*')
+files = glob(config.nmda_dataset.data_dir + "*_6_secDuration_*")[:1]
 
-data_dict = {
-    "train_files": train_files,
-    "valid_files": valid_files,
-    "test_files": test_files,
-}
+valid_files = random.choice(files)
 
-_, _, _, y_DVTs = parse_sim_experiment_with_DVT(train_sec[0])
+train_files = [f for f in files if f != valid_files]
+
+data_dict = {"train_files": train_files, "valid_files": valid_files}
+
+_, _, _, y_DVTs = parse_sim_experiment_with_DVT(train_files[0])
 X_pca_DVT = torch.tensor(np.reshape(y_DVTs, [y_DVTs.shape[0], -1]), dtype=torch.float32)
 
 num_DVT_components = config.nmda_dataset.num_DVT_components
 
-eigenvectors, explained_variance_ratio = pca_torch(X_pca_DVT, config.nmda_dataset.num_DVT_components)
+eigenvectors, explained_variance_ratio = pca_torch(
+    X_pca_DVT, config.nmda_dataset.num_DVT_components
+)
 total_explained_variance = 100 * explained_variance_ratio.sum().item()
-print(f'Total Explained Variance: {total_explained_variance:.2f}%')
+print(f"Total Explained Variance: {total_explained_variance:.2f}%")
 
-X_train, y_spike_train, y_soma_train, y_DVT_train = parse_multiple_sim_experiment_with_DVT(train_files, DVT_PCA_model=config.nmda_dataset.num_DVT_components, fit_structure=False)
+X_train, y_spike_train, y_soma_train, y_DVT_train = (
+    parse_multiple_sim_experiment_with_DVT(
+        train_files,
+        DVT_PCA_model=config.nmda_dataset.num_DVT_components,
+        fit_structure=False,
+    )
+)
 
-y_DVT_train[y_DVT_train >  config.nmda_dataset.num_DVT_components] =  config.nmda_dataset.num_DVT_components
-y_DVT_train[y_DVT_train < -config.nmda_dataset.num_DVT_components] = -config.nmda_dataset.num_DVT_components
+y_DVT_train[y_DVT_train > config.nmda_dataset.num_DVT_components] = (
+    config.nmda_dataset.num_DVT_components
+)
+y_DVT_train[y_DVT_train < -config.nmda_dataset.num_DVT_components] = (
+    -config.nmda_dataset.num_DVT_components
+)
 
 y_soma_train[y_soma_train > config.training.v_threshold] = config.training.v_threshold
 

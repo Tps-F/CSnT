@@ -1,8 +1,5 @@
 nmda_dataset:
-  train_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_train/"
-  valid_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_valid/"
-  test_data_dir: "/Reseach/Single_Neuron_InOut/data/L5PC_NMDA_test/"
-  models_dir: "/Reseach/Single_Neuron_InOut/models/NMDA/"
+  data_dir: "/home/acg16871ts/single-neurons-as-deep-nets-nmda-test-data/versions/17/Data_test/"
   num_DVT_components: 20
 
 training:
