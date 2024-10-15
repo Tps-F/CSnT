@@ -10,12 +10,13 @@ training:
   train_files_per_epoch: 6
   num_epochs: &num_epochs 250
   DVT_loss_mult_factor: &DVT_loss_mult_factor 0.1
-  v_threshold: -55
+  v_threshold: -55.0
   batch_size: 16
   window_size_ms: 300
   ignore_time_from_start: 500
   y_train_soma_bias: -67.7
   y_DTV_threshold: 3.0
+  curr_file_index: -1
 
 schedules:
   batch_size_per_epoch: [[8], *num_epochs]
@@ -51,3 +52,10 @@ learning_schedule:
   loss_weights_per_epoch:
   learning_rate_per_epoch:
   num_train_steps_per_epoch:
+
+model:
+  hidden_size: 64
+  output_size: 3
+  num_layers: 2
+  nhead: 4
+  dropout: 0.2

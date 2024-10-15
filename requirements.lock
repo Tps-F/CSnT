@@ -18,6 +18,8 @@ find-libpython==0.4.0
     # via neuron
 fsspec==2024.9.0
     # via torch
+h5py==3.12.1
+    # via nir
 jinja2==3.1.4
     # via torch
 markupsafe==3.0.1
@@ -28,13 +30,26 @@ networkx==3.4.1
     # via torch
 neuron==8.2.6
     # via csnt
+nir==1.0.4
+    # via nirtorch
+    # via norse
+nirtorch==1.0
+    # via norse
+norse==1.1.0
+    # via csnt
 numpy==1.26.4
+    # via h5py
     # via neuron
+    # via nir
+    # via norse
+    # via torchvision
 omegaconf==2.3.0
     # via csnt
 packaging==24.1
     # via neuron
     # via pytorch-ignite
+pillow==10.4.0
+    # via torchvision
 pytorch-ignite==0.5.1
     # via csnt
 pyyaml==6.0.2
@@ -45,6 +60,11 @@ sympy==1.13.3
     # via torch
 torch==2.4.1
     # via csnt
+    # via nirtorch
+    # via norse
     # via pytorch-ignite
+    # via torchvision
+torchvision==0.19.1
+    # via norse
 typing-extensions==4.12.2
     # via torch

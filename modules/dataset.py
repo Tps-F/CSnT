@@ -20,6 +20,7 @@ class SimulationDataset(Dataset):
         y_train_soma_bias=-67.7,
         y_soma_threshold=-55.0,
         y_DTV_threshold=3.0,
+        curr_file_index=-1,
     ):
         self.sim_experiment_files = sim_experiment_files
         self.num_files_per_epoch = num_files_per_epoch
@@ -30,6 +31,7 @@ class SimulationDataset(Dataset):
         self.y_train_soma_bias = y_train_soma_bias
         self.y_soma_threshold = y_soma_threshold
         self.y_DTV_threshold = y_DTV_threshold
+        self.curr_file_index = curr_file_index
 
         self.shuffle()
         self.load_file()

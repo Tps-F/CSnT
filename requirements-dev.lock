@@ -22,6 +22,8 @@ find-libpython==0.4.0
 flake8==7.1.1
 fsspec==2024.9.0
     # via torch
+h5py==3.12.1
+    # via nir
 isort==5.13.2
 jinja2==3.1.4
     # via torch
@@ -37,8 +39,19 @@ networkx==3.4.1
     # via torch
 neuron==8.2.6
     # via csnt
+nir==1.0.4
+    # via nirtorch
+    # via norse
+nirtorch==1.0
+    # via norse
+norse==1.1.0
+    # via csnt
 numpy==1.26.4
+    # via h5py
     # via neuron
+    # via nir
+    # via norse
+    # via torchvision
 omegaconf==2.3.0
     # via csnt
 packaging==24.1
@@ -47,6 +60,8 @@ packaging==24.1
     # via pytorch-ignite
 pathspec==0.12.1
     # via black
+pillow==10.4.0
+    # via torchvision
 platformdirs==4.3.6
     # via black
 pycodestyle==2.12.1
@@ -65,7 +80,12 @@ tomli==2.0.2
     # via black
 torch==2.4.1
     # via csnt
+    # via nirtorch
+    # via norse
     # via pytorch-ignite
+    # via torchvision
+torchvision==0.19.1
+    # via norse
 typing-extensions==4.12.2
     # via black
     # via torch
