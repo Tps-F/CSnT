@@ -129,9 +129,13 @@ class CSnT(nn.Module):
         # L2 regularization is applied through weight_decay in the optimizer
 
     def forward(self, x, dt=1.0):
+        batch_size, seq_len, num_segments = x.shape
+        x = x.view(batch_size * seq_len, num_segments)
         spikes, voltages = self.snn_layer(x, dt)
         x = spikes + voltages
         x = x.permute(1, 0, 2)
+
+        x = x.view(seq_len, batch_size, -1)
 
         x = self.pos_encoder(x)
         x = self.transformer_encoder(x)
