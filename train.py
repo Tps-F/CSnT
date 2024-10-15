@@ -79,7 +79,7 @@ num_layers = config.model.num_layers
 nhead = config.model.nhead
 dropout = config.model.dropout
 
-model = CSnT(input_size, hidden_size, output_size, num_layers, nhead, dropout)
+model = CSnT(input_size, hidden_size, output_size, num_layers, nhead, dropout).to(config.device)
 
 
 criterion = nn.MSELoss()
@@ -94,6 +94,10 @@ def train_step(engine, batch):
     optimizer.zero_grad()
 
     X_batch, (y_spike_batch, y_soma_batch, y_DVT_batch) = batch
+    X_batch = X_batch.to(config.device)
+    y_spike_batch = y_spike_batch.to(config.device)
+    y_soma_batch = y_soma_batch.to(config.device)
+    y_DVT_batch = y_DVT_batch.to(config.device)
 
     outputs = model(X_batch)
     y_spike_pred, y_soma_pred, y_DVT_pred = outputs.chunk(3, dim=-1)
@@ -116,6 +120,11 @@ def eval_step(engine, batch):
     model.eval()
     with torch.no_grad():
         X_batch, (y_spike_batch, y_soma_batch, y_DVT_batch) = batch
+        X_batch = X_batch.to(config.device)
+        y_spike_batch = y_spike_batch.to(config.device)
+        y_soma_batch = y_soma_batch.to(config.device)
+        y_DVT_batch = y_DVT_batch.to(config.device)
+
         outputs = model(X_batch)
         y_spike_pred, y_soma_pred, y_DVT_pred = outputs.chunk(3, dim=-1)
 
@@ -180,5 +189,5 @@ evaluator.add_event_handler(
     Events.COMPLETED, checkpoint_handler, to_save={"model": model}
 )
 
-trainer.run(train_dataloader, max_epochs=100)
+trainer.run(train_dataloader, max_epochs=config.num_epochs)
 scheduler.step()
