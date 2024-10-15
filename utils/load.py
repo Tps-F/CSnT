@@ -68,10 +68,10 @@ def parse_sim_experiment_with_DVT(
         return X, y_spike, y_soma, y_DVTs
 
     # Match the structure
-    X = np.transpose(X, axes=[2, 0, 1])
+    X = np.transpose(X, axes=[2, 1, 0])
     y_spike = y_spike.T[:, :, np.newaxis]
     y_soma = y_soma.T[:, :, np.newaxis]
-    y_DVTs = np.transpose(y_DVTs, axes=[2, 0, 1])
+    y_DVTs = np.transpose(y_DVTs, axes=[2, 1, 0])
 
     # threshold the signals
     y_soma[y_soma > y_soma_threshold] = y_soma_threshold
