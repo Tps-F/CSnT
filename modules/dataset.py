@@ -21,6 +21,7 @@ class SimulationDataset(Dataset):
         y_soma_threshold=-55.0,
         y_DTV_threshold=3.0,
         curr_file_index=-1,
+        is_shuffle=True,
     ):
         self.sim_experiment_files = sim_experiment_files
         self.num_files_per_epoch = num_files_per_epoch
@@ -32,6 +33,7 @@ class SimulationDataset(Dataset):
         self.y_soma_threshold = y_soma_threshold
         self.y_DTV_threshold = y_DTV_threshold
         self.curr_file_index = curr_file_index
+        self.is_shuffle = is_shuffle
 
         self.shuffle()
         self.load_file()
@@ -98,8 +100,12 @@ class SimulationDataset(Dataset):
         )
 
     def shuffle(self):
-        self.curr_epoch_files_to_use = np.random.choice(
-            self.sim_experiment_files, self.num_files_per_epoch, replace=False
+        self.curr_epoch_files_to_use = (
+            np.random.choice(
+                self.sim_experiment_files, self.num_files_per_epoch, replace=False
+            )
+            if self.is_shuffle
+            else self.sim_experiment_files[: self.num_files_per_epoch]
         )
 
     def load_file(self):

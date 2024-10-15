@@ -62,6 +62,7 @@ val_dataset = SimulationDataset(
     config.training.v_threshold,
     config.training.y_DTV_threshold,
     config.training.curr_file_index,
+    is_shuffle=False
 )
 train_dataloader = DataLoader(
     train_dataset, batch_size=config.training.batch_size, shuffle=False
