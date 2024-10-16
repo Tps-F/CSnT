@@ -29,7 +29,7 @@ def process_function(engine, batch):
 
 files = glob(config.nmda_dataset.data_dir + "*_6_secDuration_*")
 
-valid_files = random.choice(files)
+valid_files = list(random.choice(files))
 
 train_files = [f for f in files if f != valid_files]
 
