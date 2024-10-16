@@ -79,7 +79,9 @@ num_layers = config.model.num_layers
 nhead = config.model.nhead
 dropout = config.model.dropout
 
-model = CSnT(input_size, hidden_size, output_size, num_layers, nhead, dropout).to(config.device)
+model = CSnT(input_size, hidden_size, output_size, num_layers, nhead, dropout).to(
+    config.device
+)
 
 
 criterion = nn.MSELoss()
