@@ -136,8 +136,6 @@ class CSnT(nn.Module):
         x = x.view(batch_size * window_size_ms, seq_len, -1)
         x = x.permute(1, 0, 2)
 
-        x = x.view(seq_len, batch_size, -1)
-
         x = self.pos_encoder(x)
         x = self.transformer_encoder(x)
 
