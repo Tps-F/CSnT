@@ -64,12 +64,8 @@ val_dataset = SimulationDataset(
     config.training.curr_file_index,
     is_shuffle=False,
 )
-train_dataloader = DataLoader(
-    train_dataset, batch_size=config.training.batch_size, shuffle=False
-)
-val_dataloader = DataLoader(
-    val_dataset, batch_size=config.training.batch_size, shuffle=False
-)
+train_dataloader = DataLoader(train_dataset, shuffle=False)
+val_dataloader = DataLoader(val_dataset, shuffle=False)
 
 
 input_size = train_dataset[0][0].shape[-1]

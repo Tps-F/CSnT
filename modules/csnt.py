@@ -138,7 +138,6 @@ class CSnT(nn.Module):
     def forward(self, x, dt=1.0):
         spikes, voltages = self.snn_layer(x, dt)
         x = spikes + voltages
-
         x = x.permute(1, 0, 2)
 
         x = self.pos_encoder(x)
