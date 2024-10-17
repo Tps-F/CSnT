@@ -64,8 +64,12 @@ val_dataset = SimulationDataset(
     config.training.curr_file_index,
     is_shuffle=False,
 )
-train_dataloader = DataLoader(train_dataset, shuffle=False)
-val_dataloader = DataLoader(val_dataset, shuffle=False)
+train_dataloader = DataLoader(
+    train_dataset, shuffle=False
+)
+val_dataloader = DataLoader(
+    val_dataset, shuffle=False
+)
 
 
 input_size = train_dataset[0][0].shape[-1]
@@ -92,6 +96,7 @@ def train_step(engine, batch):
     optimizer.zero_grad()
 
     X_batch, (y_spike_batch, y_soma_batch, y_DVT_batch) = batch
+    X_batch = X_batch.squeeze(0)
     X_batch = X_batch.to(config.device)
     y_spike_batch = y_spike_batch.to(config.device)
     y_soma_batch = y_soma_batch.to(config.device)
