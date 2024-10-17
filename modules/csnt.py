@@ -77,8 +77,15 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
         self.dropout3 = nn.Dropout(dropout)
 
-    def forward(self, src, src_mask=None):
-        src2 = self.self_attn(src, src, src, attn_mask=src_mask)[0]
+    def forward(self, src, src_mask=None, src_key_padding_mask=None, is_causal=None):
+        src2 = self.self_attn(
+            src,
+            src,
+            src,
+            attn_mask=src_mask,
+            key_padding_mask=src_key_padding_mask,
+            is_causal=is_causal,
+        )[0]
         src = src + self.dropout1(src2)
         src = self.norm1(src)
 
