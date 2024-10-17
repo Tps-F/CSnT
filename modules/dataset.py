@@ -13,7 +13,7 @@ class SimulationDataset(Dataset):
         self,
         sim_experiment_files,
         num_files_per_epoch=6,
-        batch_size=8,
+        batch_size=1,
         window_size_ms=300,
         file_load=0.3,
         ignore_time_from_start=500,
@@ -25,7 +25,7 @@ class SimulationDataset(Dataset):
     ):
         self.sim_experiment_files = sim_experiment_files
         self.num_files_per_epoch = num_files_per_epoch
-        self.batch_size = batch_size
+        self.batch_size = 1
         self.window_size_ms = window_size_ms
         self.file_load = file_load
         self.ignore_time_from_start = ignore_time_from_start
