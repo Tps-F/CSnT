@@ -13,7 +13,6 @@ class SimulationDataset(Dataset):
         self,
         sim_experiment_files,
         num_files_per_epoch=6,
-        batch_size=1,
         window_size_ms=300,
         file_load=0.3,
         ignore_time_from_start=500,
@@ -25,7 +24,6 @@ class SimulationDataset(Dataset):
     ):
         self.sim_experiment_files = sim_experiment_files
         self.num_files_per_epoch = num_files_per_epoch
-        self.batch_size = 1
         self.window_size_ms = window_size_ms
         self.file_load = file_load
         self.ignore_time_from_start = ignore_time_from_start
@@ -47,7 +45,7 @@ class SimulationDataset(Dataset):
 
         self.max_batches_per_file = (
             self.num_simulations_per_file * self.sim_duration_ms
-        ) / (self.batch_size * self.window_size_ms)
+        ) / self.window_size_ms
         self.batches_per_file = int(self.file_load * self.max_batches_per_file)
         self.batches_per_epoch = self.batches_per_file * self.num_files_per_epoch
 
@@ -58,45 +56,41 @@ class SimulationDataset(Dataset):
         if (batch_idx + 1) % self.batches_per_file == 0:
             self.load_file()
 
-        selected_sim_inds = np.random.choice(
-            self.num_simulations_per_file, self.batch_size, replace=True
+        sim_ind = np.random.choice(
+            self.num_simulations_per_file, replace=True
         )
         sampling_start_time = max(self.ignore_time_from_start, self.window_size_ms)
-        selected_time_inds = np.random.choice(
+        win_time = np.random.choice(
             range(sampling_start_time, self.sim_duration_ms),
-            self.batch_size,
             replace=False,
         )
 
-        X_batch = np.zeros((self.batch_size, self.window_size_ms, self.num_segments))
-        y_spike_batch = np.zeros(
-            (self.batch_size, self.window_size_ms, self.num_output_channels_y1)
+        X = np.zeros((self.window_size_ms, self.num_segments))
+        y_spike = np.zeros(
+            (self.window_size_ms, self.num_output_channels_y1)
         )
-        y_soma_batch = np.zeros(
-            (self.batch_size, self.window_size_ms, self.num_output_channels_y2)
+        y_soma = np.zeros(
+            (self.window_size_ms, self.num_output_channels_y2)
         )
-        y_DVT_batch = np.zeros(
-            (self.batch_size, self.window_size_ms, self.num_output_channels_y3)
+        y_DVT = np.zeros(
+            (self.window_size_ms, self.num_output_channels_y3)
         )
 
-        for k, (sim_ind, win_time) in enumerate(
-            zip(selected_sim_inds, selected_time_inds)
-        ):
-            X_batch[k] = self.X[sim_ind, win_time - self.window_size_ms : win_time]
-            y_spike_batch[k] = self.y_spike[
-                sim_ind, win_time - self.window_size_ms : win_time
-            ]
-            y_soma_batch[k] = self.y_soma[
-                sim_ind, win_time - self.window_size_ms : win_time
-            ]
-            y_DVT_batch[k] = self.y_DVT[
-                sim_ind, win_time - self.window_size_ms : win_time
-            ]
+        X = self.X[sim_ind, win_time - self.window_size_ms : win_time]
+        y_spike = self.y_spike[
+            sim_ind, win_time - self.window_size_ms : win_time
+        ]
+        y_soma = self.y_soma[
+            sim_ind, win_time - self.window_size_ms : win_time
+        ]
+        y_DVT = self.y_DVT[
+            sim_ind, win_time - self.window_size_ms : win_time
+        ]
 
-        return torch.tensor(X_batch).float(), (
-            torch.tensor(y_spike_batch).float(),
-            torch.tensor(y_soma_batch).float(),
-            torch.tensor(y_DVT_batch).float(),
+        return torch.tensor(X).float(), (
+            torch.tensor(y_spike).float(),
+            torch.tensor(y_soma).float(),
+            torch.tensor(y_DVT).float(),
         )
 
     def shuffle(self):

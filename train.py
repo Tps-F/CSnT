@@ -42,7 +42,6 @@ valid_files_per_epoch = max(
 train_dataset = SimulationDataset(
     train_files,
     valid_files_per_epoch,
-    config.training.batch_size,
     config.training.window_size_ms,
     config.training.train_file_load,
     config.training.ignore_time_from_start,
@@ -50,11 +49,11 @@ train_dataset = SimulationDataset(
     config.training.v_threshold,
     config.training.y_DTV_threshold,
     config.training.curr_file_index,
+    is_shuffle=True,
 )
 val_dataset = SimulationDataset(
     valid_files,
     valid_files_per_epoch,
-    config.training.batch_size,
     config.training.window_size_ms,
     config.training.train_file_load,
     config.training.ignore_time_from_start,
