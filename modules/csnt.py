@@ -120,7 +120,7 @@ class PositionalEncoding(nn.Module):
 
 class CSnT(nn.Module):
     def __init__(
-        self, input_size, hidden_size, output_size, num_layers, nhead, dropout=0.1
+        self, input_size, hidden_size, output_sizes, num_layers, nhead, dropout=0.1
     ):
         super().__init__()
         self.snn_layer = SNNLayer(input_size, hidden_size)
@@ -129,7 +129,10 @@ class CSnT(nn.Module):
             hidden_size, nhead, hidden_size * 4, dropout
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, num_layers)
-        self.output_layer = nn.Linear(hidden_size, output_size)
+
+        self.output_layer_spike = nn.Linear(hidden_size, output_sizes[0])
+        self.output_layer_soma = nn.Linear(hidden_size, output_sizes[1])
+        self.output_layer_DVT = nn.Linear(hidden_size, output_sizes[2])
 
         # L1 regularization
         self.l1_lambda = 1e-5
@@ -144,8 +147,12 @@ class CSnT(nn.Module):
         x = self.transformer_encoder(x)
 
         x = x.permute(1, 0, 2)
-        output = self.output_layer(x)
-        return output
+
+        y_spike_pred = self.output_layer_spike(x)
+        y_soma_pred = self.output_layer_soma(x)
+        y_DVT_pred = self.output_layer_DVT(x)
+
+        return y_spike_pred, y_soma_pred, y_DVT_pred
 
     def l1_regularization(self):
         l1_loss = 0

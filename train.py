@@ -73,12 +73,12 @@ val_dataloader = DataLoader(
 
 input_size = train_dataset[0][0].shape[-1]
 hidden_size = config.model.hidden_size
-output_size = config.model.output_size
+output_sizes = config.model.output_sizes
 num_layers = config.model.num_layers
 nhead = config.model.nhead
 dropout = config.model.dropout
 
-model = CSnT(input_size, hidden_size, output_size, num_layers, nhead, dropout).to(
+model = CSnT(input_size, hidden_size, output_sizes, num_layers, nhead, dropout).to(
     config.device
 )
 

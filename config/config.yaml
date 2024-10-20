@@ -54,8 +54,9 @@ learning_schedule:
   num_train_steps_per_epoch:
 
 model:
+  input_size: 1278 # X features
   hidden_size: 64
-  output_size: 3
+  output_sizes: [1, 1, 639] # [y_spike, y_soma,  y_DVT]
   num_layers: 2
   nhead: 4
   dropout: 0.2
