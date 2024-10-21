@@ -100,8 +100,7 @@ def train_step(engine, batch):
     y_soma_batch = y_soma_batch.to(config.device)
     y_DVT_batch = y_DVT_batch.to(config.device)
 
-    outputs = model(X_batch)
-    y_spike_pred, y_soma_pred, y_DVT_pred = outputs.chunk(3, dim=-1)
+    y_spike_pred, y_soma_pred, y_DVT_pred = model(X_batch)
 
     loss_spike = criterion(y_spike_pred, y_spike_batch)
     loss_soma = criterion(y_soma_pred, y_soma_batch)

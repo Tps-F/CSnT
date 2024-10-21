@@ -56,9 +56,7 @@ class SimulationDataset(Dataset):
         if (batch_idx + 1) % self.batches_per_file == 0:
             self.load_file()
 
-        sim_ind = np.random.choice(
-            self.num_simulations_per_file, replace=True
-        )
+        sim_ind = np.random.choice(self.num_simulations_per_file, replace=True)
         sampling_start_time = max(self.ignore_time_from_start, self.window_size_ms)
         win_time = np.random.choice(
             range(sampling_start_time, self.sim_duration_ms),
@@ -66,26 +64,14 @@ class SimulationDataset(Dataset):
         )
 
         X = np.zeros((self.window_size_ms, self.num_segments))
-        y_spike = np.zeros(
-            (self.window_size_ms, self.num_output_channels_y1)
-        )
-        y_soma = np.zeros(
-            (self.window_size_ms, self.num_output_channels_y2)
-        )
-        y_DVT = np.zeros(
-            (self.window_size_ms, self.num_output_channels_y3)
-        )
+        y_spike = np.zeros((self.window_size_ms, self.num_output_channels_y1))
+        y_soma = np.zeros((self.window_size_ms, self.num_output_channels_y2))
+        y_DVT = np.zeros((self.window_size_ms, self.num_output_channels_y3))
 
         X = self.X[sim_ind, win_time - self.window_size_ms : win_time]
-        y_spike = self.y_spike[
-            sim_ind, win_time - self.window_size_ms : win_time
-        ]
-        y_soma = self.y_soma[
-            sim_ind, win_time - self.window_size_ms : win_time
-        ]
-        y_DVT = self.y_DVT[
-            sim_ind, win_time - self.window_size_ms : win_time
-        ]
+        y_spike = self.y_spike[sim_ind, win_time - self.window_size_ms : win_time]
+        y_soma = self.y_soma[sim_ind, win_time - self.window_size_ms : win_time]
+        y_DVT = self.y_DVT[sim_ind, win_time - self.window_size_ms : win_time]
 
         return torch.tensor(X).float(), (
             torch.tensor(y_spike).float(),
