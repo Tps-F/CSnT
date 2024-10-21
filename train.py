@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from ignite.engine import Engine, Events
-from ignite.handlers import EarlyStopping, ModelCheckpoint
+from ignite.handlers import EarlyStopping, ModelCheckpoint, ProgressBar
 from ignite.metrics import Loss
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
@@ -113,7 +113,7 @@ def train_step(engine, batch):
 
     optimizer.step()
 
-    return total_loss.item()
+    return {"loss": total_loss.item()}
 
 
 def eval_step(engine, batch):
@@ -134,17 +134,17 @@ def eval_step(engine, batch):
 
         total_loss = loss_spike + loss_soma + loss_DVT
 
-    return total_loss.item()
+    return {"loss": total_loss.item()}
 
 
 trainer = Engine(train_step)
 evaluator = Engine(eval_step)
 
-train_loss_metric = Loss(criterion)
-train_loss_metric.attach(trainer, "train_loss")
+Loss(criterion, output_transform=lambda x: (x["loss"],)).attach(trainer, "total_loss")
+Loss(criterion, output_transform=lambda x: x["loss"]).attach(evaluator, "loss")
 
-val_loss_metric = Loss(criterion)
-val_loss_metric.attach(evaluator, "val_loss")
+ProgressBar().attach(trainer)
+ProgressBar().attach(evaluator)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
@@ -159,14 +159,18 @@ def log_training_results(engine):
     )
 
 
-@evaluator.on(Events.COMPLETED)
-def log_validation_results(engine):
-    print(f"Validation Loss: {engine.state.metrics['val_loss']:.4f}")
-
-
 @trainer.on(Events.EPOCH_COMPLETED)
 def run_validation(engine):
     evaluator.run(val_dataloader)
+    metrics = evaluator.state.metrics
+    print(
+        f"Epoch {engine.state.epoch}, Train Loss: {engine.state.output['loss']:.4f}, Val Loss: {metrics['loss']:.4f}"
+    )
+
+
+@evaluator.on(Events.COMPLETED)
+def log_validation_results(engine):
+    print(f"Validation Loss: {engine.state.metrics['val_loss']:.4f}")
 
 
 early_stopping_handler = EarlyStopping(
@@ -185,9 +189,10 @@ checkpoint_handler = ModelCheckpoint(
     score_function=lambda engine: -engine.state.metrics["val_loss"],
     score_name="val_loss",
 )
+trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
+
 evaluator.add_event_handler(
     Events.COMPLETED, checkpoint_handler, to_save={"model": model}
 )
 
 trainer.run(train_dataloader, max_epochs=config.num_epochs)
-scheduler.step()

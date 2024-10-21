@@ -12,6 +12,12 @@
 -e file:.
 antlr4-python3-runtime==4.9.3
     # via omegaconf
+asttokens==2.4.1
+    # via icecream
+colorama==0.4.6
+    # via icecream
+executing==2.1.0
+    # via icecream
 filelock==3.16.1
     # via torch
 find-libpython==0.4.0
@@ -20,6 +26,8 @@ fsspec==2024.9.0
     # via torch
 h5py==3.12.1
     # via nir
+icecream==2.1.3
+    # via csnt
 jinja2==3.1.4
     # via torch
 markupsafe==3.0.1
@@ -50,12 +58,16 @@ packaging==24.1
     # via pytorch-ignite
 pillow==10.4.0
     # via torchvision
+pygments==2.18.0
+    # via icecream
 pytorch-ignite==0.5.1
     # via csnt
 pyyaml==6.0.2
     # via omegaconf
 setuptools==75.1.0
     # via neuron
+six==1.16.0
+    # via asttokens
 sympy==1.13.3
     # via torch
 torch==2.4.1
