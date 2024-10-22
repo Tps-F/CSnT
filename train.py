@@ -19,6 +19,7 @@ from utils.load import (
     parse_sim_experiment_with_DVT,
 )
 from utils.pca import pca_torch
+from utils.utils import get_experiment_dir
 
 config = Config()
 
@@ -211,7 +212,7 @@ early_stopping_handler = EarlyStopping(
 evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
 
 checkpoint_handler = ModelCheckpoint(
-    "models",
+    get_experiment_dir(),
     "snn_transformer",
     n_saved=3,
     create_dir=True,
