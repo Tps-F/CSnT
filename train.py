@@ -126,6 +126,9 @@ def train_step(engine, batch):
         "y_pred": (y_spike_pred, y_soma_pred, y_DVT_pred),
         "y": (y_spike_batch, y_soma_batch, y_DVT_batch),
         "loss": total_loss.item(),
+        "loss_spike": loss_spike.item(),
+        "loss_soma": loss_soma.item(),
+        "loss_DVT": loss_DVT.item(),
     }
 
 
