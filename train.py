@@ -6,8 +6,8 @@ import torch
 import torch.nn as nn
 from ignite.engine import Engine, Events
 from ignite.handlers import EarlyStopping, ModelCheckpoint, ProgressBar
-from ignite.metrics import Loss
 from ignite.handlers.param_scheduler import LRScheduler
+from ignite.metrics import Loss
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
@@ -54,7 +54,7 @@ train_dataset = SimulationDataset(
 )
 val_dataset = SimulationDataset(
     valid_files,
-    valid_files_per_epoch,
+    len(valid_files),
     config.training.window_size_ms,
     config.training.train_file_load,
     config.training.ignore_time_from_start,
@@ -88,7 +88,9 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.01)
 
 
-scheduler = LRScheduler(torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100))
+scheduler = LRScheduler(
+    torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
+)
 
 
 def train_step(engine, batch):
@@ -108,13 +110,17 @@ def train_step(engine, batch):
     loss_DVT = criterion(y_DVT_pred, y_DVT_batch)
 
     total_loss = loss_spike + loss_soma + loss_DVT + model.l1_regularization()
-    total_loss.backward()
+    total_loss.backward(retain_graph=True)
 
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
     optimizer.step()
 
-    return {"loss": total_loss.item()}
+    return {
+        "y_pred": (y_spike_pred, y_soma_pred, y_DVT_pred),
+        "y": (y_spike_batch, y_soma_batch, y_DVT_batch),
+        "loss": total_loss.item(),
+    }
 
 
 def eval_step(engine, batch):
@@ -126,8 +132,7 @@ def eval_step(engine, batch):
         y_soma_batch = y_soma_batch.to(config.device)
         y_DVT_batch = y_DVT_batch.to(config.device)
 
-        outputs = model(X_batch)
-        y_spike_pred, y_soma_pred, y_DVT_pred = outputs.chunk(3, dim=-1)
+        y_spike_pred, y_soma_pred, y_DVT_pred = model(X_batch)
 
         loss_spike = criterion(y_spike_pred, y_spike_batch)
         loss_soma = criterion(y_soma_pred, y_soma_batch)
@@ -135,14 +140,24 @@ def eval_step(engine, batch):
 
         total_loss = loss_spike + loss_soma + loss_DVT
 
-    return {"loss": total_loss.item()}
+    return {
+        "y_pred": (y_spike_pred, y_soma_pred, y_DVT_pred),
+        "y": (y_spike_batch, y_soma_batch, y_DVT_batch),
+        "loss": total_loss.item(),
+    }
 
 
 trainer = Engine(train_step)
 evaluator = Engine(eval_step)
 
-Loss(criterion, output_transform=lambda x: (x["loss"],)).attach(trainer, "total_loss")
-Loss(criterion, output_transform=lambda x: x["loss"]).attach(evaluator, "loss")
+
+Loss(criterion, output_transform=lambda x: (x["y_pred"], x["y"])).attach(
+    trainer, "loss"
+)
+Loss(criterion, output_transform=lambda x: (x["y_pred"], x["y"])).attach(
+    evaluator, "loss"
+)
+
 
 ProgressBar().attach(trainer)
 ProgressBar().attach(evaluator)
@@ -151,13 +166,6 @@ ProgressBar().attach(evaluator)
 @trainer.on(Events.EPOCH_COMPLETED)
 def reset_epoch(engine):
     train_dataset.shuffle()
-
-
-@trainer.on(Events.EPOCH_COMPLETED)
-def log_training_results(engine):
-    print(
-        f"Epoch {engine.state.epoch}, Train Loss: {engine.state.metrics['train_loss']:.4f}"
-    )
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
