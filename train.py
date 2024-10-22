@@ -179,12 +179,12 @@ def run_validation(engine):
 
 @evaluator.on(Events.COMPLETED)
 def log_validation_results(engine):
-    print(f"Validation Loss: {engine.state.metrics['val_loss']:.4f}")
+    print(f"Validation Loss: {engine.state.metrics['loss']:.4f}")
 
 
 early_stopping_handler = EarlyStopping(
     patience=10,
-    score_function=lambda engine: -engine.state.metrics["val_loss"],
+    score_function=lambda engine: -engine.state.metrics["loss"],
     trainer=trainer,
 )
 evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
@@ -195,8 +195,8 @@ checkpoint_handler = ModelCheckpoint(
     save_interval=1,
     n_saved=3,
     create_dir=True,
-    score_function=lambda engine: -engine.state.metrics["val_loss"],
-    score_name="val_loss",
+    score_function=lambda engine: -engine.state.metrics["loss"],
+    score_name="loss",
 )
 trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
 
