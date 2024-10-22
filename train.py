@@ -118,7 +118,7 @@ def train_step(engine, batch):
     )
     total_loss.backward(retain_graph=True)
 
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
 
     optimizer.step()
 
@@ -147,7 +147,11 @@ def eval_step(engine, batch):
         loss_soma = criterion(y_soma_pred, y_soma_batch)
         loss_DVT = criterion(y_DVT_pred, y_DVT_batch)
 
-        total_loss = loss_spike + loss_soma + loss_DVT
+        total_loss = (
+            loss_spike * config.learning_rate_per_epoch[0]
+            + loss_soma * config.learning_rate_per_epoch[1]
+            + loss_DVT * config.learning_rate_per_epoch[2]
+        )
 
     return {
         "y_pred": (y_spike_pred, y_soma_pred, y_DVT_pred),
@@ -184,7 +188,9 @@ def reset_epoch(engine):
 def run_validation(engine):
     evaluator.run(val_dataloader)
     metrics = evaluator.state.metrics
-    print(f"Epoch {engine.state.epoch}, Val Loss: {metrics['loss']:.4f}")
+    print(
+        f"Epoch {engine.state.epoch}, Train Loss: {engine.state.output['loss']:.4f}, Val Loss: {metrics['loss']:.4f}"
+    )
 
 
 @trainer.on(Events.ITERATION_COMPLETED)
