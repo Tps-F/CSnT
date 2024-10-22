@@ -177,11 +177,6 @@ def run_validation(engine):
     )
 
 
-@evaluator.on(Events.COMPLETED)
-def log_validation_results(engine):
-    print(f"Validation Loss: {engine.state.metrics['loss']:.4f}")
-
-
 early_stopping_handler = EarlyStopping(
     patience=10,
     score_function=lambda engine: -engine.state.metrics["loss"],
