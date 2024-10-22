@@ -192,7 +192,6 @@ evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
 checkpoint_handler = ModelCheckpoint(
     "models",
     "snn_transformer",
-    save_interval=1,
     n_saved=3,
     create_dir=True,
     score_function=lambda engine: -engine.state.metrics["loss"],
