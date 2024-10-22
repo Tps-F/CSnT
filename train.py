@@ -85,7 +85,7 @@ model = CSnT(input_size, hidden_size, output_sizes, num_layers, nhead, dropout).
 
 
 criterion = nn.MSELoss()
-optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.01)
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.0003, weight_decay=0.001)
 
 
 scheduler = LRScheduler(
@@ -109,7 +109,12 @@ def train_step(engine, batch):
     loss_soma = criterion(y_soma_pred, y_soma_batch)
     loss_DVT = criterion(y_DVT_pred, y_DVT_batch)
 
-    total_loss = loss_spike + loss_soma + loss_DVT + model.l1_regularization()
+    total_loss = (
+        loss_spike * config.learning_rate_per_epoch[0]
+        + loss_soma * config.learning_rate_per_epoch[1]
+        + loss_DVT * config.learning_rate_per_epoch[2]
+        + model.l1_regularization()
+    )
     total_loss.backward(retain_graph=True)
 
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -144,6 +149,9 @@ def eval_step(engine, batch):
         "y_pred": (y_spike_pred, y_soma_pred, y_DVT_pred),
         "y": (y_spike_batch, y_soma_batch, y_DVT_batch),
         "loss": total_loss.item(),
+        "loss_spike": loss_spike.item(),
+        "loss_soma": loss_soma.item(),
+        "loss_DVT": loss_DVT.item(),
     }
 
 
@@ -172,9 +180,27 @@ def reset_epoch(engine):
 def run_validation(engine):
     evaluator.run(val_dataloader)
     metrics = evaluator.state.metrics
-    print(
-        f"Epoch {engine.state.epoch}, Train Loss: {engine.state.output['loss']:.4f}, Val Loss: {metrics['loss']:.4f}"
-    )
+    print(f"Epoch {engine.state.epoch}, Val Loss: {metrics['loss']:.4f}")
+
+
+@trainer.on(Events.ITERATION_COMPLETED)
+def log_training_loss(engine):
+    metrics = engine.state.output
+    print(f"Iteration {engine.state.iteration}")
+    print(f"Spike Loss: {metrics['loss_spike']:.4f}")
+    print(f"Soma Loss: {metrics['loss_soma']:.4f}")
+    print(f"DVT Loss: {metrics['loss_DVT']:.4f}")
+
+
+@trainer.on(Events.ITERATION_COMPLETED)
+def log_grad_norm(engine):
+    total_norm = 0
+    for p in model.parameters():
+        if p.grad is not None:
+            param_norm = p.grad.data.norm(2)
+            total_norm += param_norm.item() ** 2
+    total_norm = total_norm ** (1.0 / 2)
+    print(f"Gradient norm: {total_norm:.4f}")
 
 
 early_stopping_handler = EarlyStopping(

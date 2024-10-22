@@ -55,8 +55,8 @@ learning_schedule:
 
 model:
   input_size: 1278 # X features
-  hidden_size: 256
+  hidden_size: 512
   output_sizes: [1, 1, 639] # [y_spike, y_soma,  y_DVT]
-  num_layers: 2
-  nhead: 4
+  num_layers: 3
+  nhead: 8
   dropout: 0.2
