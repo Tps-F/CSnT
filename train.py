@@ -7,6 +7,7 @@ import torch.nn as nn
 from ignite.engine import Engine, Events
 from ignite.handlers import EarlyStopping, ModelCheckpoint, ProgressBar
 from ignite.metrics import Loss
+from ignite.handlers.param_scheduler import LRScheduler
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
@@ -87,7 +88,7 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.01)
 
 
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
+scheduler = LRScheduler(torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100))
 
 
 def train_step(engine, batch):

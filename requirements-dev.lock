@@ -98,6 +98,8 @@ torch==2.4.1
     # via torchvision
 torchvision==0.19.1
     # via norse
+tqdm==4.66.5
+    # via csnt
 typing-extensions==4.12.2
     # via black
     # via torch
