@@ -20,8 +20,11 @@ from utils.load import (
 )
 from utils.pca import pca_torch
 from utils.utils import get_experiment_dir
+from torch.utils.tensorboard.writer import SummaryWriter
+
 
 config = Config()
+writer = SummaryWriter(log_dir=get_experiment_dir() + "/tensorboard_logs")
 
 
 def process_function(engine, batch):
@@ -192,6 +195,8 @@ def run_validation(engine):
         f"Epoch {engine.state.epoch}, Train Loss: {engine.state.output['loss']:.4f}, Val Loss: {metrics['loss']:.4f}"
     )
 
+    writer.add_scalar("Validation/Total Loss", metrics['loss'], engine.state.epoch)
+
 
 @trainer.on(Events.ITERATION_COMPLETED)
 def log_training_loss(engine):
@@ -200,6 +205,11 @@ def log_training_loss(engine):
     print(f"Spike Loss: {metrics['loss_spike']:.4f}")
     print(f"Soma Loss: {metrics['loss_soma']:.4f}")
     print(f"DVT Loss: {metrics['loss_DVT']:.4f}")
+
+    writer.add_scalar("Training/Spike Loss", metrics['loss_spike'], engine.state.iteration)
+    writer.add_scalar("Training/Soma Loss", metrics['loss_soma'], engine.state.iteration)
+    writer.add_scalar("Training/DVT Loss", metrics['loss_DVT'], engine.state.iteration)
+    writer.add_scalar("Training/Total Loss", metrics['loss'], engine.state.iteration)
 
 
 @trainer.on(Events.ITERATION_COMPLETED)
@@ -211,6 +221,8 @@ def log_grad_norm(engine):
             total_norm += param_norm.item() ** 2
     total_norm = total_norm ** (1.0 / 2)
     print(f"Gradient norm: {total_norm:.4f}")
+
+    writer.add_scalar("Training/Gradient Norm", total_norm, engine.state.iteration)
 
 
 early_stopping_handler = EarlyStopping(
@@ -235,3 +247,4 @@ evaluator.add_event_handler(
 )
 
 trainer.run(train_dataloader, max_epochs=config.num_epochs)
+writer.close()
