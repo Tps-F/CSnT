@@ -114,9 +114,9 @@ def train_step(engine, batch):
     loss_DVT = criterion(y_DVT_pred, y_DVT_batch)
 
     total_loss = (
-        loss_spike * config.learning_rate_per_epoch[0]
-        + loss_soma * config.learning_rate_per_epoch[1]
-        + loss_DVT * config.learning_rate_per_epoch[2]
+        loss_spike * config.loss_weights_per_epoch[engine.state.epoch][0]
+        + loss_soma * config.loss_weights_per_epoch[engine.state.epoch][1]
+        + loss_DVT * config.loss_weights_per_epoch[engine.state.epoch][2]
         + model.l1_regularization()
     )
     total_loss.backward(retain_graph=True)
@@ -151,9 +151,9 @@ def eval_step(engine, batch):
         loss_DVT = criterion(y_DVT_pred, y_DVT_batch)
 
         total_loss = (
-            loss_spike * config.learning_rate_per_epoch[0]
-            + loss_soma * config.learning_rate_per_epoch[1]
-            + loss_DVT * config.learning_rate_per_epoch[2]
+            loss_spike * config.loss_weights_per_epoch[engine.state.epoch][0]
+            + loss_soma * config.loss_weights_per_epoch[engine.state.epoch][1]
+            + loss_DVT * config.loss_weights_per_epoch[engine.state.epoch][2]
         )
 
     return {
