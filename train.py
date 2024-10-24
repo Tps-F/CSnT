@@ -4,12 +4,14 @@ from glob import glob
 import numpy as np
 import torch
 import torch.nn as nn
+from icecream import ic
 from ignite.engine import Engine, Events
 from ignite.handlers import EarlyStopping, ModelCheckpoint, ProgressBar
 from ignite.handlers.param_scheduler import LRScheduler
 from ignite.metrics import Loss
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard.writer import SummaryWriter
 
 from config import Config
 from modules.csnt import CSnT
@@ -20,8 +22,6 @@ from utils.load import (
 )
 from utils.pca import pca_torch
 from utils.utils import get_experiment_dir
-from torch.utils.tensorboard.writer import SummaryWriter
-
 
 config = Config()
 writer = SummaryWriter(log_dir=get_experiment_dir() + "/tensorboard_logs")
@@ -74,7 +74,6 @@ train_dataloader = DataLoader(
 val_dataloader = DataLoader(
     val_dataset, batch_size=config.training.batch_size, shuffle=False
 )
-
 
 input_size = train_dataset[0][0].shape[-1]
 hidden_size = config.model.hidden_size
@@ -195,7 +194,7 @@ def run_validation(engine):
         f"Epoch {engine.state.epoch}, Train Loss: {engine.state.output['loss']:.4f}, Val Loss: {metrics['loss']:.4f}"
     )
 
-    writer.add_scalar("Validation/Total Loss", metrics['loss'], engine.state.epoch)
+    writer.add_scalar("Validation/Total Loss", metrics["loss"], engine.state.epoch)
 
 
 @trainer.on(Events.ITERATION_COMPLETED)
@@ -206,10 +205,14 @@ def log_training_loss(engine):
     print(f"Soma Loss: {metrics['loss_soma']:.4f}")
     print(f"DVT Loss: {metrics['loss_DVT']:.4f}")
 
-    writer.add_scalar("Training/Spike Loss", metrics['loss_spike'], engine.state.iteration)
-    writer.add_scalar("Training/Soma Loss", metrics['loss_soma'], engine.state.iteration)
-    writer.add_scalar("Training/DVT Loss", metrics['loss_DVT'], engine.state.iteration)
-    writer.add_scalar("Training/Total Loss", metrics['loss'], engine.state.iteration)
+    writer.add_scalar(
+        "Training/Spike Loss", metrics["loss_spike"], engine.state.iteration
+    )
+    writer.add_scalar(
+        "Training/Soma Loss", metrics["loss_soma"], engine.state.iteration
+    )
+    writer.add_scalar("Training/DVT Loss", metrics["loss_DVT"], engine.state.iteration)
+    writer.add_scalar("Training/Total Loss", metrics["loss"], engine.state.iteration)
 
 
 @trainer.on(Events.ITERATION_COMPLETED)

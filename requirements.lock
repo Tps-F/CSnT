@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+absl-py==2.1.0
+    # via tensorboard
 antlr4-python3-runtime==4.9.3
     # via omegaconf
 asttokens==2.4.1
@@ -24,14 +26,19 @@ find-libpython==0.4.0
     # via neuron
 fsspec==2024.9.0
     # via torch
+grpcio==1.67.0
+    # via tensorboard
 h5py==3.12.1
     # via nir
 icecream==2.1.3
     # via csnt
 jinja2==3.1.4
     # via torch
+markdown==3.7
+    # via tensorboard
 markupsafe==3.0.1
     # via jinja2
+    # via werkzeug
 mpmath==1.3.0
     # via sympy
 networkx==3.4.1
@@ -50,14 +57,18 @@ numpy==1.26.4
     # via neuron
     # via nir
     # via norse
+    # via tensorboard
     # via torchvision
 omegaconf==2.3.0
     # via csnt
 packaging==24.1
     # via neuron
     # via pytorch-ignite
+    # via tensorboard
 pillow==10.4.0
     # via torchvision
+protobuf==5.28.3
+    # via tensorboard
 pygments==2.18.0
     # via icecream
 pytorch-ignite==0.5.1
@@ -66,10 +77,16 @@ pyyaml==6.0.2
     # via omegaconf
 setuptools==75.1.0
     # via neuron
+    # via tensorboard
 six==1.16.0
     # via asttokens
+    # via tensorboard
 sympy==1.13.3
     # via torch
+tensorboard==2.18.0
+    # via csnt
+tensorboard-data-server==0.7.2
+    # via tensorboard
 torch==2.4.1
     # via csnt
     # via nirtorch
@@ -82,3 +99,5 @@ tqdm==4.66.5
     # via csnt
 typing-extensions==4.12.2
     # via torch
+werkzeug==3.0.4
+    # via tensorboard
