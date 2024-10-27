@@ -11,7 +11,7 @@ training:
   num_epochs: &num_epochs 250
   DVT_loss_mult_factor: &DVT_loss_mult_factor 0.1
   v_threshold: -55.0
-  batch_size: 16
+  batch_size: 8
   window_size_ms: 300
   ignore_time_from_start: 500
   y_train_soma_bias: -67.7

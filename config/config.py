@@ -15,6 +15,7 @@ class Config:
         self.num_epochs = config.training.num_epochs
         self.model = config.model
         self.device = "cuda"
+        self.weight_decay = 0.01
 
         # define schedule
         config.schedules.loss_weights_per_epoch = [
