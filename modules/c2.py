@@ -135,7 +135,7 @@ class AdaptiveLIFNeuron(nn.Module):
         v_thresh=-50.0,  # Firing threshold
         v_reset=-65.0,  # Reset potential
         adapt_a=0.5,  # Adapt
-        adapt_b=0.1,    # Spike-adapt
+        adapt_b=0.1,  # Spike-adapt
     ):
         super().__init__()
 
@@ -186,10 +186,10 @@ class BiologicalSNNLayer(nn.Module):
         self,
         input_size,
         hidden_size,
-        tau_m=20.0, # Membrance time
-        tau_adapt=100.0, # Adaptation time
-        v_thresh=-50.0, # Firing threshold
-        v_rest=-65.0, # Reset potential
+        tau_m=20.0,  # Membrance time
+        tau_adapt=100.0,  # Adaptation time
+        v_thresh=-50.0,  # Firing threshold
+        v_rest=-65.0,  # Reset potential
     ):
         super().__init__()
         self.input_size = input_size
@@ -321,7 +321,6 @@ class NeuronalAttention(nn.Module):
             )
             v_mod = v_mod.transpose(1, 2)  # [batch, num_heads, seq_len, head_dim]
             v = v * torch.sigmoid(v_mod)
-
 
         attn_probs = F.softmax(attn_scores, dim=-1)
         attn_probs = self.dropout(attn_probs)
