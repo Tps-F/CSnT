@@ -10,19 +10,31 @@
 結果として、単純なSNNレイヤーに通常の自己注意機構を導入したときのスパイクの予測精度は48%であるのに対し、提案手法を導入したCSnTモデルでは79%まで向上させることができた。
 
 ## モデルのアーキテクチャについて
-モデルの構造は以下のように作成しました。
+モデルの構造は以下のように作成した。
 
 ![Architecture](https://github.com/user-attachments/assets/44058c2d-df56-4e63-84c0-f37674adba4f "Architecture of CSnT")
-
+構造として、Biological SNN Layer, Neural Transformer, Loss Computationに分かれる。
 以下に、新たに提唱及び改変したモジュールについて説明する。
 ### 生物学的自己注意メカニズムの提案
 まず最初に、自己注意メカニズムに時間的な相関を捉えられるようなモジュールの提案をした。
-従来の自己注意メカニズム・Transformerは以下のような関数で表される。
+従来の自己注意メカニズム・Attentionは以下の関数で表される。
 
 $$\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$
 
-ここに、スパイクタイミング依存可塑性(STDP)を導入する。
+ここに、スパイクタイミング依存可塑性(STDP)を用いたスパイク活動の変調について、以下のように定義する。
 
 $${S_{ij} = \gamma \sum_{t} \text{spike}_i(t)\text{spike}_j(t)e^{-|t-t'|/\tau}}$$
 
-ここで、$`\text{spike}_i(t)\text{spike}_j(t)`$ は二つの同期生について相関を表し、$`e^{-|t-t'|/\tau}`$ は時間減衰、$`\gamma`$はスケーリングパラメータである。
+ここで、
+
+https://github.com/Tps-F/CSnT/blob/ac0777b500fb21446bacde58562368b973551401/modules/c2.py#L300
+
+$`\text{spike}_i(t)\text{spike}_j(t)`$ は二つの同期生について相関を表し、
+https://github.com/Tps-F/CSnT/blob/ac0777b500fb21446bacde58562368b973551401/modules/c2.py#L276-L283
+$`e^{-|t-t'|/\tau}`$ は時間減衰、$`\gamma`$はスケーリングパラメータである。
+
+これらを用いて、生物学的自己注意メカニズムを、
+
+$$ {\text{Attention}(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d_k}}(1 + S))V} $$
+
+と定義した。
