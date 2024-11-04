@@ -18,7 +18,6 @@ from modules.c2 import CSnT
 from modules.dataset import SimulationDataset
 from utils.utils import get_experiment_dir
 
-# CUDA memory optimization settings
 torch.cuda.empty_cache()
 gc.collect()
 torch.backends.cudnn.benchmark = True
@@ -26,7 +25,7 @@ torch.backends.cudnn.benchmark = True
 config = Config()
 device = torch.device(config.device if torch.cuda.is_available() else "cpu")
 experiment_dir = get_experiment_dir()
-writer = SummaryWriter(log_dir=experiment_dir + "tensorboard_logs")
+writer = SummaryWriter(log_dir=os.path.join(experiment_dir, "tensorboard_logs"))
 
 
 class CustomLoss(nn.Module):
@@ -67,7 +66,6 @@ def compute_metrics(y_pred, y_true):
     spike_pred, soma_pred, dvt_pred = y_pred
     spike_true, soma_true, dvt_true = y_true
 
-    # Compute metrics on CPU to save GPU memory
     spike_pred_flat = spike_pred.sigmoid().cpu().numpy().ravel()
     spike_true_flat = spike_true.cpu().numpy().ravel()
 
@@ -159,7 +157,7 @@ def create_data_loaders(train_dataset, val_dataset, config):
 
 def train_step(engine, batch):
     model.train()
-    optimizer.zero_grad(set_to_none=True)  # More efficient than zero_grad()
+    optimizer.zero_grad(set_to_none=True)
 
     X_batch, (y_spike_batch, y_soma_batch, y_DVT_batch) = batch
     X_batch = X_batch.to(device, non_blocking=True)
@@ -180,7 +178,6 @@ def train_step(engine, batch):
 
     metrics = compute_metrics(predictions, (y_spike_batch, y_soma_batch, y_DVT_batch))
 
-    # Clean up to free memory
     del X_batch, y_spike_batch, y_soma_batch, y_DVT_batch, predictions
 
     return {"loss": total_loss.item(), **loss_components, **metrics}
@@ -233,7 +230,6 @@ if __name__ == "__main__":
     trainer = Engine(train_step)
     evaluator = Engine(validation_step)
 
-    # Attach metrics
     metrics = [
         "loss",
         "spike_loss",
@@ -253,7 +249,6 @@ if __name__ == "__main__":
             evaluator, metric
         )
 
-    # Handlers
     ProgressBar().attach(trainer, ["loss", "spike_auc", "soma_explained_var"])
     ProgressBar().attach(evaluator, ["loss", "spike_auc", "soma_explained_var"])
 
