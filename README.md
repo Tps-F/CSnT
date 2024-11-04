@@ -1,7 +1,6 @@
 # CSnT: 生物模倣的自己注意機構を導入したスパイキングニューラルネットワークによる神経動態予測モデルの提案
 
-このリポジトリには本研究にて私が提案したCSnTモデルの実装を公開している。
-
+以下のリポジトリに本研究で提案したCSnTモデルの実装を公開しているので、確認してください。
 Repository: https://github.com/Tps-F/CSnT/
 ## 本研究について
 本研究は、ニューロンモデルにおいて生物学的な自己注意機構を導入することで、スパイキングニューラルネットワークの神経動態予測精度を向上させると共に、より生物学的な挙動を再現することを目的としている。
@@ -77,7 +76,7 @@ $$ A_{spike} = \frac{SS^T}{\sqrt{d}} $$
 ここで、時間減衰を
 https://github.com/Tps-F/CSnT/blob/eeb88a6bdb25ca1d61f3a9fcf2b54621d8ada26a/modules/c2.py#L280-L282
 
-$$ K(\Delta t) = \exp(-|\Delta t|/\tau) $$
+$$ K(\Delta t) = \exp\left(\frac{-|\Delta t|}{\tau}\right) $$
 
 と表すことで、自己注意メカニズムを
 
