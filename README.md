@@ -185,8 +185,8 @@ $$
 このように、DVT Loss は綺麗に下がっていっている一方、Spike のLoss は一度下がってから安定していな
 いことがわかる。Spike について、正答率は最大0.79、Loss は最小0.0045 に達した。
 
-また、作成したモデル用いた神経活動について下に記載する。
-![Image 863x394](https://github.com/user-attachments/assets/b6b9e8e0-66b3-42ea-904c-7c9f4242f083)
+また、作成したモデルを用いて推論した神経活動について下に記載する。
+<img src="https://github.com/user-attachments/assets/b6b9e8e0-66b3-42ea-904c-7c9f4242f083" width="80%">
 
 
 ## 考察・今後の展望
