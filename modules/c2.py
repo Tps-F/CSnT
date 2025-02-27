@@ -69,10 +69,22 @@ class IonicCurrents(nn.Module):
 
 
 class SynapticPlasticity(nn.Module):
-    def __init__(self, input_size, hidden_size, tau_pre=20.0, tau_post=20.0):
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        tau_pre=20.0,
+        tau_post=20.0,
+        learning_rate=0.01,
+        w_min=-1.0,
+        w_max=1.0,
+    ):
         super().__init__()
         self.register_buffer("tau_pre", torch.tensor(tau_pre, dtype=torch.float32))
         self.register_buffer("tau_post", torch.tensor(tau_post, dtype=torch.float32))
+        self.register_buffer("lr", torch.tensor(learning_rate, dtype=torch.float32))
+        self.register_buffer("w_min", torch.tensor(w_min, dtype=torch.float32))
+        self.register_buffer("w_max", torch.tensor(w_max, dtype=torch.float32))
 
         self.weights = nn.Parameter(torch.randn(hidden_size, input_size) * 0.01)
         self.pre_trace = None
@@ -119,8 +131,8 @@ class SynapticPlasticity(nn.Module):
                     dw = dw + torch.matmul(post_spikes_t, pre_trace_t)  # LTP
                     dw = dw - torch.matmul(post_trace_t, pre_spikes_t)  # LTD
 
-            dw = dw / (batch_size * seq_len) * 0.01
-            weights = torch.clamp(self.weights + dw, -1.0, 1.0)
+            dw = dw / (batch_size * seq_len) * self.lr
+            weights = torch.clamp(self.weights + dw, self.w_min, self.w_max)
             self.weights.data.copy_(weights)
 
         return output
@@ -136,6 +148,7 @@ class AdaptiveLIFNeuron(nn.Module):
         v_reset=-65.0,  # Reset potential
         adapt_a=0.5,  # Adapt
         adapt_b=0.1,  # Spike-adapt
+        delta_T=2.0,
     ):
         super().__init__()
 
@@ -146,6 +159,10 @@ class AdaptiveLIFNeuron(nn.Module):
         self.register_buffer("v_reset", torch.tensor(v_reset, dtype=torch.float32))
         self.register_buffer("adapt_a", torch.tensor(adapt_a, dtype=torch.float32))
         self.register_buffer("adapt_b", torch.tensor(adapt_b, dtype=torch.float32))
+        self.register_buffer("delta_T", torch.tensor(delta_T, dtype=torch.float32))
+        self.register_buffer(
+            "v_T", torch.tensor(v_thresh - 5.0, dtype=torch.float32)
+        )  # spike initiation threshold
 
         self.reset_states()
 
@@ -160,8 +177,12 @@ class AdaptiveLIFNeuron(nn.Module):
 
         dt = torch.tensor(dt, device=I_in.device, dtype=torch.float32)
 
-        # Update mebrance potential
-        dv = (-(self.v - self.v_rest) - self.w + I_in) * (dt / self.tau_m)
+        exp_term = self.delta_T * torch.exp(
+            (self.v - self.v_T) / self.delta_T
+        )  # cal EIF
+
+        # Update membrane potential
+        dv = (-(self.v - self.v_rest) + exp_term - self.w + I_in) * (dt / self.tau_m)
         _v = self.v + dv
 
         spike = (_v >= self.v_thresh).float()
@@ -510,7 +531,7 @@ class CSnT(nn.Module):
 
         self.feature_extractor = FeatureExtractor(input_size, hidden_size)
 
-        self.temporal_conv = MultiScaleTemporalConv(hidden_size)
+        # self.temporal_conv = MultiScaleTemporalConv(hidden_size)
 
         self.snn_layer = BiologicalSNNLayer(hidden_size, hidden_size)
 
@@ -544,7 +565,7 @@ class CSnT(nn.Module):
 
         x = self.feature_extractor(x)
 
-        temporal_features = self.temporal_conv(x)
+        # temporal_features = self.temporal_conv(x)
 
         x = self.pos_encoder(x.transpose(0, 1)).transpose(0, 1)
 
